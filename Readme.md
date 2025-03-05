@@ -26,11 +26,40 @@ docker build -t xp-springboot-mysql .
 helm install xp-mysql oci://registry-1.docker.io/bitnamicharts/mysql
 ```
 
+```sh
+helm install xp-mysql oci://registry-1.docker.io/bitnamicharts/mysql \
+  --set auth.defaultAuthenticationPlugin=mysql_native_password
+```
+
+```sh
+helm install xp-mysql oci://registry-1.docker.io/bitnamicharts/mysql \
+  --set auth.defaultAuthenticationPlugin=mysql_native_password \
+  --set auth.rootAuthenticationPlugin=mysql_native_password \
+  --set auth.allowRemoteRootAccess=true
+```
+
+```
+helm install xp-mysql oci://registry-1.docker.io/bitnamicharts/mysql \
+  --set auth.rootPassword=mysql-root-password \
+  --set auth.allowRemoteRootAccess=true \
+  -f dev-mysql-config.yaml
+```
+
+```
+helm install xp-mysql oci://registry-1.docker.io/bitnamicharts/mysql \
+  --set auth.rootPassword=mysql-root-password \
+  --set auth.user=myapp \
+  --set auth.password=mypassword1 \
+  --set auth.database=my_database
+```
+
 Execute the following to get the administrator credentials:
 
 ```
 MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace default xp-mysql -o jsonpath="{.data.mysql-root-password}" | base64 -d)
 ```
+
+5u4ETI8bxI
 
 Run a pod that you can use as a client:
 
@@ -41,10 +70,9 @@ kubectl run xp-mysql-client --rm --tty -i --restart='Never' --image  docker.io/b
 Connect to the MySQL pod
 
 ```
-mysql -h xp-mysql.default.svc.cluster.local -uroot -p"$MYSQL_ROOT_PASSWORD"
+mysql -h xp-mysql.default.svc.cluster.local -uroot -p"CFr4Zk1agh"
 ```
 
-```
 CREATE DATABASE orders;
 
 SHOW DATABASES;
@@ -101,5 +129,12 @@ To connect to your database:
 3. 
    z5ooSkHFa8
 
+helm show values oci://registry-1.docker.io/bitnamicharts/mysql | grep -E 'rootAuthenticationPlugin|defaultAuthenticationPlugin|allowRemoteRootAccess'
 
+helm install oci://registry-1.docker.io/bitnamicharts/mysql -f dev-mysql-config.yaml
+
+
+CREATE USER 'appuser'@'%' IDENTIFIED BY 'mypassword1';
+GRANT ALL PRIVILEGES ON my_database.* TO 'appuser'@'%';
+FLUSH PRIVILEGES;
 
