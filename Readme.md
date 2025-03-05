@@ -1,3 +1,14 @@
+# Helpful commands
+
+```
+# Encode string value in Powershell
+[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes('secret-value'))
+
+# Decode string value in Powershell
+[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('bXlwYXNzd29yZDE='))
+```
+
+
 # 1. Build docker image
 
 Used this builder because 21 is not supported yet
@@ -20,46 +31,25 @@ java {
 docker build -t xp-springboot-mysql .
 ```
 
-# 2. Setup MySQL
+# 2. Setup MySQL Database
 
 ```
 helm install xp-mysql oci://registry-1.docker.io/bitnamicharts/mysql
 ```
 
-```sh
-helm install xp-mysql oci://registry-1.docker.io/bitnamicharts/mysql \
-  --set auth.defaultAuthenticationPlugin=mysql_native_password
-```
-
-```sh
-helm install xp-mysql oci://registry-1.docker.io/bitnamicharts/mysql \
-  --set auth.defaultAuthenticationPlugin=mysql_native_password \
-  --set auth.rootAuthenticationPlugin=mysql_native_password \
-  --set auth.allowRemoteRootAccess=true
-```
-
-```
-helm install xp-mysql oci://registry-1.docker.io/bitnamicharts/mysql \
-  --set auth.rootPassword=mysql-root-password \
-  --set auth.allowRemoteRootAccess=true \
-  -f dev-mysql-config.yaml
-```
-
-```
-helm install xp-mysql oci://registry-1.docker.io/bitnamicharts/mysql \
-  --set auth.rootPassword=mysql-root-password \
-  --set auth.user=myapp \
-  --set auth.password=mypassword1 \
-  --set auth.database=my_database
-```
-
 Execute the following to get the administrator credentials:
+
+Bash
 
 ```
 MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace default xp-mysql -o jsonpath="{.data.mysql-root-password}" | base64 -d)
 ```
 
-5u4ETI8bxI
+Powershell
+
+```
+$MYSQL_ROOT_PASSWORD = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String( (kubectl get secret --namespace default xp-mysql -o jsonpath="{.data.mysql-root-password}") ))
+```
 
 Run a pod that you can use as a client:
 
@@ -67,17 +57,24 @@ Run a pod that you can use as a client:
 kubectl run xp-mysql-client --rm --tty -i --restart='Never' --image  docker.io/bitnami/mysql:8.4.4-debian-12-r4 --namespace default --env MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD --command -- bash
 ```
 
-Connect to the MySQL pod
+Connect to the MySQL pod. Fill in the $MYSQL_ROOT_PASSWORD part
 
 ```
-mysql -h xp-mysql.default.svc.cluster.local -uroot -p"CFr4Zk1agh"
+mysql -h xp-mysql.default.svc.cluster.local -uroot -p"$MYSQL_ROOT_PASSWORD"
 ```
 
-CREATE DATABASE orders;
+Create a user that will be the user to give to the JDBC. Note this is the user and password that will be set in dev-secrets.yaml.
 
+```
+CREATE USER 'appuser'@'%' IDENTIFIED BY 'mypassword1';
+GRANT ALL PRIVILEGES ON my_database.* TO 'appuser'@'%';
+FLUSH PRIVILEGES;
+```
+
+```
 SHOW DATABASES;
 
-USE orders;
+USE my_database;
 
 CREATE TABLE orders (
     order_id      VARCHAR(50)     NOT NULL,
@@ -101,40 +98,3 @@ Exit from the pod bash
 ```
 exit
 ```
-
-
-
-Tip:
-
-Watch the deployment status using the command: kubectl get pods -w --namespace default
-
-Services:
-
-echo Primary: xp-mysql.default.svc.cluster.local:3306
-
-Execute the following to get the administrator credentials:
-
-echo Username: root
-MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace default xp-mysql -o jsonpath="{.data.mysql-root-password}" | base64 -d)
-
-To connect to your database:
-
-1. Run a pod that you can use as a client:
-
-   kubectl run xp-mysql-client --rm --tty -i --restart='Never' --image  docker.io/bitnami/mysql:8.4.4-debian-12-r4 --namespace default --env MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD --command -- bash
-
-2. To connect to primary service (read/write):
-
-   mysql -h xp-mysql.default.svc.cluster.local -uroot -p"$MYSQL_ROOT_PASSWORD"
-3. 
-   z5ooSkHFa8
-
-helm show values oci://registry-1.docker.io/bitnamicharts/mysql | grep -E 'rootAuthenticationPlugin|defaultAuthenticationPlugin|allowRemoteRootAccess'
-
-helm install oci://registry-1.docker.io/bitnamicharts/mysql -f dev-mysql-config.yaml
-
-
-CREATE USER 'appuser'@'%' IDENTIFIED BY 'mypassword1';
-GRANT ALL PRIVILEGES ON my_database.* TO 'appuser'@'%';
-FLUSH PRIVILEGES;
-

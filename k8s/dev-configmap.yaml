@@ -4,4 +4,3 @@ metadata:
   name: xp-springboot-mysql-configmap
 data:
   SPRING_DATASOURCE_URL: "jdbc:mysql://xp-mysql.default.svc.cluster.local:3306/my_database"
-  #   SPRING_DATASOURCE_URL: "mysql://xp-mysql.default.svc.cluster.local:3306/my_database?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&disabledAuthenticationPlugins=mysql_native_password"
