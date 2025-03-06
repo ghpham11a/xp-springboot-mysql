@@ -76,15 +76,20 @@ SHOW DATABASES;
 
 USE my_database;
 
-CREATE TABLE orders (
-    order_id      VARCHAR(50)     NOT NULL,
-    order_amount  DECIMAL(10,2),
-    description   VARCHAR(255),
-    order_date    DATE,
-    PRIMARY KEY (order_id)
+CREATE TABLE Accounts (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Email VARCHAR(50) NOT NULL,
+    DateOfBirth DATE,
+    AccountNumber VARCHAR(20) UNIQUE,
+    Balance DECIMAL(18, 2) DEFAULT 0.00,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO orders (order_id, order_amount) VALUES ('1234', 10.00);
+INSERT INTO Accounts (Email, DateOfBirth, AccountNumber, Balance)
+VALUES 
+('john.doe@example.com', '1985-06-15', 'ACC123456', 1000.00),
+('jane.smith@example.com', '1990-09-25', 'ACC654321', 2500.50),
+('alice.jones@example.com', '1978-12-05', 'ACC789012', 150.75);
 ```
 
 To exit

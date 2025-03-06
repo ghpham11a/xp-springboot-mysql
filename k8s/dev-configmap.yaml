@@ -4,3 +4,7 @@ metadata:
   name: xp-springboot-mysql-configmap
 data:
   SPRING_DATASOURCE_URL: "jdbc:mysql://xp-mysql.default.svc.cluster.local:3306/my_database"
+  REDIS_HOST: "xp-redis-master.default.svc.cluster.local"
+  REDIS_PORT: "6379"
+  KAFKA_BOOTSTRAP_SERVERS: "xp-kafka.default.svc.cluster.local:9092"
+  KAFKA_GROUP_ID: ""
