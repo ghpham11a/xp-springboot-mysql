@@ -1,14 +1,17 @@
 package com.ghpham11a.xp_springboot_mysql;
 
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.kafka.core.KafkaTemplate;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication
 public class XpSpringbootMysqlApplication {
@@ -21,7 +24,9 @@ public class XpSpringbootMysqlApplication {
 	 * Simple runner that tests the Oracle DB connection on startup.
 	 */
 	@Bean
-	CommandLineRunner testConnections(DataSource dataSource, RedisTemplate<String, Object> redisTemplate) {
+	CommandLineRunner testConnections(DataSource dataSource,
+									  RedisTemplate<String, Object> redisTemplate,
+									  KafkaTemplate<String, Object> kafkaTemplate) {
 		return args -> {
 			// Test MySQL
 			System.out.println("Attempting to connect to MySQL DB...");
@@ -39,21 +44,32 @@ public class XpSpringbootMysqlApplication {
 			// Test Redis
 			System.out.println("Attempting to connect to Redis...");
 			try {
-				// Obtain a low-level connection from RedisConnectionFactory
-				var connection = redisTemplate.getConnectionFactory().getConnection();
-				// Use 'PING' to check if Redis is responding
-				String result = connection.ping() == null ? null : new String(connection.ping());
-
+				var redisConn = redisTemplate.getConnectionFactory().getConnection();
+				String result = redisConn.ping() == null ? null : new String(redisConn.ping());
 				if ("PONG".equals(result)) {
 					System.out.println("SUCCESS: Connected to Redis! PING -> " + result);
 				} else {
 					System.out.println("WARNING: Redis PING returned: " + result);
 				}
-
-				// Always close the connection when you're done
-				connection.close();
+				redisConn.close();
 			} catch (Exception ex) {
 				System.err.println("ERROR: Failed to connect to Redis.");
+				ex.printStackTrace();
+			}
+
+			// Test Kafka
+			System.out.println("Attempting to send a test message to Kafka...");
+			try {
+				// Using 'healthcheck-topic' as an example; make sure this topic exists or is auto-created.
+				var future = kafkaTemplate.send("accounts-topic", "Health check message!");
+
+				// Wait up to 5 seconds for send to complete
+				var sendResult = future.get(5, TimeUnit.SECONDS);
+				RecordMetadata metadata = sendResult.getRecordMetadata();
+				System.out.printf("SUCCESS: Sent test message to Kafka topic=%s partition=%d offset=%d%n",
+						metadata.topic(), metadata.partition(), metadata.offset());
+			} catch (Exception ex) {
+				System.err.println("ERROR: Failed to send message to Kafka.");
 				ex.printStackTrace();
 			}
 		};
