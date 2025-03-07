@@ -1,14 +1,14 @@
 package com.ghpham11a.xp_springboot_mysql.services;
 
 import com.ghpham11a.xp_springboot_mysql.models.Account;
-
+import com.ghpham11a.xp_springboot_mysql.models.AccountFetchResult;
 import java.util.List;
 import java.util.Optional;
 
 public interface AccountsService {
     List<Account> getAllAccounts();
 
-    Optional<Account> getAccountById(int id);
+    AccountFetchResult getAccountById(int id);
 
     int createAccount(Account account);
 

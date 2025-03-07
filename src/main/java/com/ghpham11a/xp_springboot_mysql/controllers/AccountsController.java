@@ -1,6 +1,7 @@
 package com.ghpham11a.xp_springboot_mysql.controllers;
 
 import com.ghpham11a.xp_springboot_mysql.models.Account;
+import com.ghpham11a.xp_springboot_mysql.models.AccountFetchResult;
 import com.ghpham11a.xp_springboot_mysql.services.AccountsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,10 +31,17 @@ public class AccountsController {
     // GET by ID
     @GetMapping("/{id}")
     public ResponseEntity<Account> getById(@PathVariable int id) {
-        Optional<Account> accountOpt = accountsService.getAccountById(id);
-        return accountOpt
+        AccountFetchResult result = accountsService.getAccountById(123);
+
+        ResponseEntity<Account> response = result.getAccount()
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+
+        if (result.isFromRedis()) {
+            response.getHeaders().add("cached-value", "true");
+        }
+
+        return response;
     }
 
     // CREATE
