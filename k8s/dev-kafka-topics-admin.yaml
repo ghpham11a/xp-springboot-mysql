@@ -12,5 +12,8 @@ spec:
         - >
           echo "security.protocol=SASL_PLAINTEXT" > /tmp/kafka-client.properties &&
           echo "sasl.mechanism=PLAIN" >> /tmp/kafka-client.properties &&
-          echo "sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=\"user1\" password=\"qwqATlv2tp\";" >> /tmp/kafka-client.properties &&
-          kafka-topics.sh --create --topic accounts-topic --partitions 3 --replication-factor 3 --bootstrap-server xp-kafka.default.svc.cluster.local:9092 --command-config /tmp/kafka-client.properties
+          echo "sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=\"user1\" password=\"unnyQOyCBC\";" >> /tmp/kafka-client.properties &&
+          kafka-topics.sh --create --topic account_created --partitions 3 --replication-factor 1 --bootstrap-server xp-kafka.default.svc.cluster.local:9092 --command-config /tmp/kafka-client.properties &&
+          kafka-topics.sh --create --topic account_updated --partitions 3 --replication-factor 1 --bootstrap-server xp-kafka.default.svc.cluster.local:9092 --command-config /tmp/kafka-client.properties &&
+          kafka-topics.sh --create --topic account_deleted --partitions 3 --replication-factor 1 --bootstrap-server xp-kafka.default.svc.cluster.local:9092 --command-config /tmp/kafka-client.properties &&
+          echo "All topics created successfully"

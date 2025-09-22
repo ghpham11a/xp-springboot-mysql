@@ -2,14 +2,24 @@
 # Usage
 
 ```
+GET http://localhost:8080/api/accounts/1
+```
+
+```
+POST http://localhost:8080/api/accounts
 {
-  "id": 1,
   "email": "john.doe@example.com",
   "dateOfBirth": "1985-07-13",
   "accountNumber": "ACCT-12345-XYZ",
   "balance": 1234.56,
-  "createdAt": "2025-03-07T10:25:00"
 }
+```
+
+Check Kafka
+
+```
+GET http://localhost:8080/api/kafka-events/stats
+GET http://localhost:8080/api/kafka-events/topic/account_created
 ```
 
 # Helpful commands
@@ -47,6 +57,8 @@ docker build -t xp-springboot-mysql .
 
 # 2. Setup MySQL Database
 
+Make sure any associated PVCs and PVs are deleted first
+
 ```
 helm install xp-mysql oci://registry-1.docker.io/bitnamicharts/mysql
 ```
@@ -62,7 +74,7 @@ MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace default xp-mysql -o jsonpat
 Powershell
 
 ```
-$MYSQL_ROOT_PASSWORD = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String( (kubectl get secret --namespace default xp-mysql -o jsonpath="{.data.mysql-root-password}") ))
+$MYSQL_ROOT_PASSWORD = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String( (kubectl get secret --namespace default xp-mysql -o jsonpath="{.data.mysql-root-password}")))
 ```
 
 Run a pod that you can use as a client:
@@ -75,10 +87,6 @@ Connect to the MySQL pod. Fill in the $MYSQL_ROOT_PASSWORD part
 
 ```
 mysql -h xp-mysql.default.svc.cluster.local -uroot -p"$MYSQL_ROOT_PASSWORD"
-```
-
-```
-mysql -h xp-mysql.default.svc.cluster.local -uroot -p"p857q9NFZt"
 ```
 
 Create a user that will be the user to give to the JDBC. Note this is the user and password that will be set in dev-secrets.yaml.
@@ -102,6 +110,8 @@ CREATE TABLE Accounts (
     Balance DECIMAL(18, 2) DEFAULT 0.00,
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+SHOW TABLES;
 
 INSERT INTO Accounts (Email, DateOfBirth, AccountNumber, Balance)
 VALUES 
@@ -186,4 +196,10 @@ kubectl exec --tty -i redis-client --namespace default -- bash
 redis-cli -h xp-redis-master -p 6379
 
 AUTH [REDIS_PASSWORD]
+```
+
+# 5. Clean up
+
+```
+kubectl delete deployment xp-springboot-mysql
 ```

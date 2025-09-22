@@ -1,10 +1,13 @@
 package com.ghpham11a.xp_springboot_mysql.models;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class Account {
+public class Account implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Integer id;
 

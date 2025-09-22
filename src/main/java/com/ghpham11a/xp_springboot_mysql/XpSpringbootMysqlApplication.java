@@ -20,9 +20,6 @@ public class XpSpringbootMysqlApplication {
 		SpringApplication.run(XpSpringbootMysqlApplication.class, args);
 	}
 
-	/**
-	 * Simple runner that tests the Oracle DB connection on startup.
-	 */
 	@Bean
 	CommandLineRunner testConnections(DataSource dataSource,
 									  RedisTemplate<String, Object> redisTemplate,

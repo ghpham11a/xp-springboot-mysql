@@ -31,7 +31,7 @@ public class AccountsController {
     // GET by ID
     @GetMapping("/{id}")
     public ResponseEntity<Account> getById(@PathVariable int id) {
-        AccountFetchResult result = accountsService.getAccountById(123);
+        AccountFetchResult result = accountsService.getAccountById(id);
 
         ResponseEntity<Account> response = result.getAccount()
                 .map(ResponseEntity::ok)
